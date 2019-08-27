@@ -1,5 +1,4 @@
 language: java
-sudo: required
 
 cache:
   directories:
@@ -8,7 +7,6 @@ cache:
 env:
   global:
     - COVERAGE_BUILD: 0
-    - PIP_RETRY: 10
     - CODECOV_VERSION: 2.0.15
 
 matrix:
@@ -17,6 +15,10 @@ matrix:
     - dist: trusty
       env: COVERAGE_BUILD=1
       jdk: openjdk7
+      addons:
+        apt:
+          packages:
+            - "python3-pip"
     # OpenJDK 8
     - dist: trusty
       jdk: openjdk8
@@ -31,9 +33,10 @@ matrix:
       jdk: oraclejdk11
 
 install:
-  if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
-    sudo pip install --disable-pip-version-check --retries "${PIP_RETRY}" codecov=="${CODECOV_VERSION}";
-  fi
+  - if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
+      travis_retry pip3 install --user --upgrade pip &&
+      travis_retry pip3 install --user codecov=="${CODECOV_VERSION}";
+    fi
 
 script:
   - if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
