@@ -133,6 +133,22 @@ public class TryWithResourceTemplateTest {
   }
 
   @Test
+  public void test_resourceThrowsException_resourceExceptionIsThrown() throws Exception {
+    test_resourceThrowsException_resourceThrowableIsThrown(new TestException(ORIGIN_RESOURCE));
+  }
+
+  @Test
+  public void test_resourceThrowsRuntimeException_resourceExceptionIsThrown() throws Exception {
+    test_resourceThrowsException_resourceThrowableIsThrown(
+        new TestRuntimeException(ORIGIN_RESOURCE));
+  }
+
+  @Test
+  public void test_resourceThrowsError_resourceErrorThrown() throws Exception {
+    test_resourceThrowsException_resourceThrowableIsThrown(new TestError(ORIGIN_RESOURCE));
+  }
+
+  @Test
   public void test_producerThrowsException_consumerIsNotCalled() throws Exception {
     test_producerThrows_consumerNotCalled(new TestException(ORIGIN_PRODUCER));
   }
@@ -239,6 +255,36 @@ public class TryWithResourceTemplateTest {
     test_consumerThrows_and_resourceThrows_and_consumerThrowableThrows_throwableThrowableIsThrown(
         new TestException(ORIGIN_CONSUMER), new TestException(ORIGIN_RESOURCE),
         new TestError(ORIGIN_THROWABLE_ADD_SUPPRESSED));
+  }
+
+  private void test_resourceThrowsException_resourceThrowableIsThrown(Throwable resourceThrowable)
+      throws Exception {
+    final TestResource resource = spy(new TestResource());
+    doThrow(resourceThrowable).when(resource).close();
+    final TestConsumerResult consumerResult = new TestConsumerResult();
+    ResourceProducer<TestResource> producer = spy(new ResourceProducer<TestResource>() {
+      @Override
+      public TestResource produce() {
+        return resource;
+      }
+    });
+    ResourceConsumer<TestResource, TestConsumerResult> consumer = spy(
+        new ResourceConsumer<TestResource, TestConsumerResult>() {
+          @Override
+          public TestConsumerResult consume(final TestResource resource) {
+            return consumerResult;
+          }
+        });
+
+    try {
+      templateFactory.create().execute(producer, consumer);
+      fail("Expected " + resourceThrowable);
+    } catch (Throwable e) {
+      assertThat(e, is(sameInstance(resourceThrowable)));
+    }
+
+    verify(consumer).consume(resource);
+    verify(resource).close();
   }
 
   private void test_producerThrows_consumerNotCalled(final Throwable producerException)
