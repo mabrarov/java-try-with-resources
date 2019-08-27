@@ -22,19 +22,19 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.ArgumentCaptor;
 
 @RunWith(Parameterized.class)
-public class TryWithResourcesTemplateEmulatorTest {
+public class TryWithResourceTemplateEmulatorTest {
 
   public interface TemplateFactory<T extends AutoCloseable> {
 
-    TryWithResourcesTemplate<T> create(ResourceProducer<T> producer);
+    TryWithResourceTemplate<T> create();
 
   }
 
   public static class TemplateNativeFactory<T extends AutoCloseable> implements TemplateFactory<T> {
 
     @Override
-    public TryWithResourcesTemplate<T> create(ResourceProducer<T> producer) {
-      return new TryWithResourcesTemplateNative<>(producer);
+    public TryWithResourceTemplate<T> create() {
+      return new TryWithResourceTemplateNative<>();
     }
 
   }
@@ -43,8 +43,8 @@ public class TryWithResourcesTemplateEmulatorTest {
       TemplateFactory<T> {
 
     @Override
-    public TryWithResourcesTemplate<T> create(ResourceProducer<T> producer) {
-      return new TryWithResourcesTemplateEmulator<>(producer);
+    public TryWithResourceTemplate<T> create() {
+      return new TryWithResourceTemplateEmulator<>();
     }
 
   }
@@ -53,12 +53,12 @@ public class TryWithResourcesTemplateEmulatorTest {
   private static final Object[][] PARAMETERS = {
       {
         new TemplateNativeFactory<TestResource>(),
-        TryWithResourcesTemplateNative.class.getSimpleName()
+        TryWithResourceTemplateNative.class.getSimpleName()
       }
       ,
       {
         new TemplateEmulatorFactory<TestResource>(),
-        TryWithResourcesTemplateEmulator.class.getSimpleName()
+        TryWithResourceTemplateEmulator.class.getSimpleName()
       }
   };
   // @formatter:on
@@ -78,13 +78,13 @@ public class TryWithResourcesTemplateEmulatorTest {
   public void test_produceResource_resourceIsPassedToConsumer() throws Exception {
     final TestResource resource = spy(new TestResource());
     final TestConsumerResult consumerResult = new TestConsumerResult();
-    ResourceProducer<TestResource> resourceProducer = spy(new ResourceProducer<TestResource>() {
+    ResourceProducer<TestResource> producer = spy(new ResourceProducer<TestResource>() {
       @Override
       public TestResource produce() {
         return resource;
       }
     });
-    ResourceConsumer<TestResource, TestConsumerResult> resourceConsumer = spy(
+    ResourceConsumer<TestResource, TestConsumerResult> consumer = spy(
         new ResourceConsumer<TestResource, TestConsumerResult>() {
           @Override
           public TestConsumerResult consume(final TestResource resource) {
@@ -92,12 +92,11 @@ public class TryWithResourcesTemplateEmulatorTest {
           }
         });
 
-    TestConsumerResult templateResult = templateFactory.create(resourceProducer)
-        .execute(resourceConsumer);
+    TestConsumerResult templateResult = templateFactory.create().execute(producer, consumer);
 
-    verify(resourceProducer).produce();
+    verify(producer).produce();
     ArgumentCaptor<TestResource> consumerArgCaptor = ArgumentCaptor.forClass(TestResource.class);
-    verify(resourceConsumer).consume(consumerArgCaptor.capture());
+    verify(consumer).consume(consumerArgCaptor.capture());
     assertThat(consumerArgCaptor.getValue(), is(sameInstance(resource)));
     verify(resource).close();
     assertThat(templateResult, is(sameInstance(consumerResult)));
@@ -106,13 +105,13 @@ public class TryWithResourcesTemplateEmulatorTest {
   @Test
   public void test_nullResource_noExceptionWhenResourceClosed() throws Exception {
     final TestConsumerResult consumerResult = new TestConsumerResult();
-    ResourceProducer<TestResource> resourceProducer = new ResourceProducer<TestResource>() {
+    ResourceProducer<TestResource> producer = new ResourceProducer<TestResource>() {
       @Override
       public TestResource produce() {
         return null;
       }
     };
-    ResourceConsumer<TestResource, TestConsumerResult> resourceConsumer = spy(
+    ResourceConsumer<TestResource, TestConsumerResult> consumer = spy(
         new ResourceConsumer<TestResource, TestConsumerResult>() {
           @Override
           public TestConsumerResult consume(final TestResource resource) {
@@ -120,11 +119,10 @@ public class TryWithResourcesTemplateEmulatorTest {
           }
         });
 
-    TestConsumerResult templateResult = templateFactory.create(resourceProducer)
-        .execute(resourceConsumer);
+    TestConsumerResult templateResult = templateFactory.create().execute(producer, consumer);
 
     ArgumentCaptor<TestResource> consumerArgCaptor = ArgumentCaptor.forClass(TestResource.class);
-    verify(resourceConsumer).consume(consumerArgCaptor.capture());
+    verify(consumer).consume(consumerArgCaptor.capture());
     assertThat(consumerArgCaptor.getValue(), is(nullValue()));
     assertThat(templateResult, is(sameInstance(consumerResult)));
   }
@@ -238,7 +236,7 @@ public class TryWithResourcesTemplateEmulatorTest {
 
   private void test_producerThrows_consumerNotCalled(final Throwable producerException)
       throws Exception {
-    ResourceProducer<TestResource> resourceProducer = new ResourceProducer<TestResource>() {
+    ResourceProducer<TestResource> producer = new ResourceProducer<TestResource>() {
       @Override
       public TestResource produce() throws Exception {
         if (producerException instanceof Exception) {
@@ -247,7 +245,7 @@ public class TryWithResourcesTemplateEmulatorTest {
         throw (Error) producerException;
       }
     };
-    ResourceConsumer<TestResource, TestConsumerResult> resourceConsumer = spy(
+    ResourceConsumer<TestResource, TestConsumerResult> consumer = spy(
         new ResourceConsumer<TestResource, TestConsumerResult>() {
           @Override
           public TestConsumerResult consume(final TestResource resource) {
@@ -256,25 +254,25 @@ public class TryWithResourcesTemplateEmulatorTest {
         });
 
     try {
-      templateFactory.create(resourceProducer).execute(resourceConsumer);
+      templateFactory.create().execute(producer, consumer);
       fail("Expected " + producerException);
     } catch (Throwable e) {
       assertThat(e, is(sameInstance(producerException)));
     }
 
-    verify(resourceConsumer, never()).consume(any(TestResource.class));
+    verify(consumer, never()).consume(any(TestResource.class));
   }
 
   private void test_consumerThrows_resourceClosed(final Throwable consumerThrowable)
       throws Exception {
     final TestResource resource = spy(new TestResource());
-    ResourceProducer<TestResource> resourceProducer = new ResourceProducer<TestResource>() {
+    ResourceProducer<TestResource> producer = new ResourceProducer<TestResource>() {
       @Override
       public TestResource produce() {
         return resource;
       }
     };
-    ResourceConsumer<TestResource, TestConsumerResult> resourceConsumer = spy(
+    ResourceConsumer<TestResource, TestConsumerResult> consumer = spy(
         new ResourceConsumer<TestResource, TestConsumerResult>() {
           @Override
           public TestConsumerResult consume(final TestResource resource) throws Exception {
@@ -286,14 +284,14 @@ public class TryWithResourcesTemplateEmulatorTest {
         });
 
     try {
-      templateFactory.create(resourceProducer).execute(resourceConsumer);
+      templateFactory.create().execute(producer, consumer);
       fail("Expected " + consumerThrowable);
     } catch (Throwable e) {
       assertThat(e, is(sameInstance(consumerThrowable)));
     }
 
     ArgumentCaptor<TestResource> consumerArgCaptor = ArgumentCaptor.forClass(TestResource.class);
-    verify(resourceConsumer).consume(consumerArgCaptor.capture());
+    verify(consumer).consume(consumerArgCaptor.capture());
     assertThat(consumerArgCaptor.getValue(), is(sameInstance(resource)));
     verify(resource).close();
   }
@@ -302,13 +300,13 @@ public class TryWithResourcesTemplateEmulatorTest {
       final Throwable consumerThrowable, final Throwable resourceThrowable) throws Exception {
     final TestResource resource = mock(TestResource.class);
     doThrow(resourceThrowable).when(resource).close();
-    ResourceProducer<TestResource> resourceProducer = new ResourceProducer<TestResource>() {
+    ResourceProducer<TestResource> producer = new ResourceProducer<TestResource>() {
       @Override
       public TestResource produce() {
         return resource;
       }
     };
-    ResourceConsumer<TestResource, TestConsumerResult> resourceConsumer = spy(
+    ResourceConsumer<TestResource, TestConsumerResult> consumer = spy(
         new ResourceConsumer<TestResource, TestConsumerResult>() {
           @Override
           public TestConsumerResult consume(final TestResource resource) throws Exception {
@@ -320,7 +318,7 @@ public class TryWithResourcesTemplateEmulatorTest {
         });
 
     try {
-      templateFactory.create(resourceProducer).execute(resourceConsumer);
+      templateFactory.create().execute(producer, consumer);
       fail("Expected " + consumerThrowable);
     } catch (Throwable e) {
       assertThat(e, is(sameInstance(consumerThrowable)));
@@ -330,7 +328,7 @@ public class TryWithResourcesTemplateEmulatorTest {
     }
 
     ArgumentCaptor<TestResource> consumerArgCaptor = ArgumentCaptor.forClass(TestResource.class);
-    verify(resourceConsumer).consume(consumerArgCaptor.capture());
+    verify(consumer).consume(consumerArgCaptor.capture());
     assertThat(consumerArgCaptor.getValue(), is(sameInstance(resource)));
     verify(resource).close();
   }
@@ -344,13 +342,13 @@ public class TryWithResourcesTemplateEmulatorTest {
     final Throwable consumerThrowableSpy = spy(consumerThrowable);
     doThrow(throwableThrowable).when(consumerThrowableSpy).addSuppressed(resourceThrowable);
 
-    ResourceProducer<TestResource> resourceProducer = new ResourceProducer<TestResource>() {
+    ResourceProducer<TestResource> producer = new ResourceProducer<TestResource>() {
       @Override
       public TestResource produce() {
         return resource;
       }
     };
-    ResourceConsumer<TestResource, TestConsumerResult> resourceConsumer = spy(
+    ResourceConsumer<TestResource, TestConsumerResult> consumer = spy(
         new ResourceConsumer<TestResource, TestConsumerResult>() {
           @Override
           public TestConsumerResult consume(final TestResource resource) throws Exception {
@@ -362,7 +360,7 @@ public class TryWithResourcesTemplateEmulatorTest {
         });
 
     try {
-      templateFactory.create(resourceProducer).execute(resourceConsumer);
+      templateFactory.create().execute(producer, consumer);
       fail("Expected " + resourceThrowable);
     } catch (Throwable e) {
       assertThat(e, is(sameInstance(throwableThrowable)));
@@ -371,7 +369,7 @@ public class TryWithResourcesTemplateEmulatorTest {
     }
 
     ArgumentCaptor<TestResource> consumerArgCaptor = ArgumentCaptor.forClass(TestResource.class);
-    verify(resourceConsumer).consume(consumerArgCaptor.capture());
+    verify(consumer).consume(consumerArgCaptor.capture());
     assertThat(consumerArgCaptor.getValue(), is(sameInstance(resource)));
     verify(resource).close();
   }
