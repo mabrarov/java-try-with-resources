@@ -1,25 +1,49 @@
 language: java
+sudo: required
 
 cache:
   directories:
     - ${HOME}/.m2/repository/
 
+env:
+  global:
+    - COVERAGE_BUILD: 0
+    - PIP_RETRY: 10
+    - CODECOV_VERSION: 2.0.15
+
 matrix:
   include:
-    # OpenJDK 11
-    - dist: bionic
-      jdk: openjdk11
-    # Oracle JDK 11
+    # OpenJDK 7
     - dist: trusty
-      jdk: oraclejdk11
+      env: COVERAGE_BUILD=1
+      jdk: openjdk7
     # OpenJDK 8
     - dist: trusty
       jdk: openjdk8
     # Oracle JDK 8
     - dist: trusty
       jdk: oraclejdk8
+    # OpenJDK 11
+    - dist: bionic
+      jdk: openjdk11
+    # Oracle JDK 11
+    - dist: trusty
+      jdk: oraclejdk11
 
-install: skip
+install:
+  if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
+    sudo pip install --disable-pip-version-check --retries "${PIP_RETRY}" codecov=="${CODECOV_VERSION}";
+  fi
 
 script:
-  - mvn -f "${TRAVIS_BUILD_DIR}/pom.xml" --batch-mode clean package
+  - if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
+      export MAVEN_PROFILES=" -P jacoco";
+    else
+      export MAVEN_PROFILES="";
+    fi
+  - mvn -f "${TRAVIS_BUILD_DIR}/pom.xml" --batch-mode clean package${MAVEN_PROFILES}
+
+after_success:
+  - if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
+      travis_retry codecov --required --token "${CODECOV_TOKEN}" --root "${TRAVIS_BUILD_DIR}";
+    fi
