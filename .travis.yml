@@ -14,7 +14,6 @@ matrix:
       jdk: oraclejdk11
     # OpenJDK 8
     - dist: trusty
-      env: RELEASE_JOB=1
       jdk: openjdk8
     # Oracle JDK 8
     - dist: trusty
