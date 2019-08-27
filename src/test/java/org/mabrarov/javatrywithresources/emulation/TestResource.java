@@ -21,4 +21,9 @@ public class TestResource implements AutoCloseable {
     // Nothing to do here
   }
 
+  @Override
+  public String toString() {
+    return "TestResource{" + "id=" + id + '}';
+  }
+
 }

@@ -16,4 +16,9 @@ public class TestConsumerResult {
     return id;
   }
 
+  @Override
+  public String toString() {
+    return "TestConsumerResult{" + "id=" + id + '}';
+  }
+
 }

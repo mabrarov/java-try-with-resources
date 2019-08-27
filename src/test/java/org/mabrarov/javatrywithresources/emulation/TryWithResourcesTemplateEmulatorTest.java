@@ -1,5 +1,6 @@
 package org.mabrarov.javatrywithresources.emulation;
 
+import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.spy;
@@ -76,8 +77,8 @@ public class TryWithResourcesTemplateEmulatorTest {
     verify(resourceProducer, times(1)).produce();
     ArgumentCaptor<TestResource> consumerArgCaptor = ArgumentCaptor.forClass(TestResource.class);
     verify(resourceConsumer, times(1)).consume(consumerArgCaptor.capture());
-    assertThat(consumerArgCaptor.getValue(), sameInstance(resource));
+    assertThat(consumerArgCaptor.getValue(), is(sameInstance(resource)));
     verify(resource, times(1)).close();
-    assertThat(templateResult, sameInstance(consumerResult));
+    assertThat(templateResult, is(sameInstance(consumerResult)));
   }
 }
