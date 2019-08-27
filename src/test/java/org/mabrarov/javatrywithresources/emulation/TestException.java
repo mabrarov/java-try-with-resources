@@ -2,23 +2,15 @@ package org.mabrarov.javatrywithresources.emulation;
 
 public class TestException extends Exception {
 
-  private final int id;
+  private final String origin;
 
-  public TestException() {
-    this(0);
-  }
-
-  public TestException(int id) {
-    this.id = id;
-  }
-
-  public int getId() {
-    return id;
+  public TestException(String origin) {
+    this.origin = origin;
   }
 
   @Override
   public String toString() {
-    return "TestException{" + "id=" + id + '}';
+    return getClass().getSimpleName() + " thrown by " + origin + '}';
   }
 
 }

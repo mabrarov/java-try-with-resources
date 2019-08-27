@@ -2,23 +2,15 @@ package org.mabrarov.javatrywithresources.emulation;
 
 public class TestError extends Error {
 
-  private final int id;
+  private final String origin;
 
-  public TestError() {
-    this(0);
-  }
-
-  public TestError(int id) {
-    this.id = id;
-  }
-
-  public int getId() {
-    return id;
+  public TestError(String origin) {
+    this.origin = origin;
   }
 
   @Override
   public String toString() {
-    return "TestError{" + "id=" + id + '}';
+    return getClass().getSimpleName() + " thrown by " + origin + '}';
   }
 
 }
