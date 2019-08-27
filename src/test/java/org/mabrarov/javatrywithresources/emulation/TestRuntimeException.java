@@ -2,23 +2,15 @@ package org.mabrarov.javatrywithresources.emulation;
 
 public class TestRuntimeException extends RuntimeException {
 
-  private final int id;
+  private final String origin;
 
-  public TestRuntimeException() {
-    this(0);
-  }
-
-  public TestRuntimeException(int id) {
-    this.id = id;
-  }
-
-  public int getId() {
-    return id;
+  public TestRuntimeException(String origin) {
+    this.origin = origin;
   }
 
   @Override
   public String toString() {
-    return "TestRuntimeException{" + "id=" + id + '}';
+    return getClass().getSimpleName() + " thrown by " + origin + '}';
   }
 
 }

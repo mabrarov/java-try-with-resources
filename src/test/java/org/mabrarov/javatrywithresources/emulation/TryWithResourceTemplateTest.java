@@ -22,7 +22,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.ArgumentCaptor;
 
 @RunWith(Parameterized.class)
-public class TryWithResourceTemplateEmulatorTest {
+public class TryWithResourceTemplateTest {
 
   public interface TemplateFactory<T extends AutoCloseable> {
 
@@ -55,7 +55,7 @@ public class TryWithResourceTemplateEmulatorTest {
         new TemplateNativeFactory<TestResource>(),
         TryWithResourceTemplateNative.class.getSimpleName()
       }
-      // TODO: Fix TemplateEmulatorFactory to pass all tests
+      // TODO: Fix TryWithResourceTemplateEmulator to pass all tests
       //,
       //{
       //  new TemplateEmulatorFactory<TestResource>(),
@@ -63,6 +63,11 @@ public class TryWithResourceTemplateEmulatorTest {
       //}
   };
   // @formatter:on
+
+  private static String ORIGIN_PRODUCER = "ResourceProducer#produce method";
+  private static String ORIGIN_CONSUMER = "ResourceConsumer#consume method";
+  private static String ORIGIN_RESOURCE = "AutoCloseable#close method";
+  private static String ORIGIN_THROWABLE_ADD_SUPPRESSED = "Throwable#addSuppressed method";
 
   @Parameters(name = "{1}")
   public static Object[][] data() {
@@ -130,109 +135,111 @@ public class TryWithResourceTemplateEmulatorTest {
 
   @Test
   public void test_producerThrowsException_consumerIsNotCalled() throws Exception {
-    test_producerThrows_consumerNotCalled(new TestException());
+    test_producerThrows_consumerNotCalled(new TestException(ORIGIN_PRODUCER));
   }
 
   @Test
   public void test_producerThrowsRuntimeException_consumerIsNotCalled() throws Exception {
-    test_producerThrows_consumerNotCalled(new TestRuntimeException());
+    test_producerThrows_consumerNotCalled(new TestRuntimeException(ORIGIN_PRODUCER));
   }
 
   @Test
   public void test_producerThrowsError_consumerIsNotCalled() throws Exception {
-    test_producerThrows_consumerNotCalled(new TestError());
+    test_producerThrows_consumerNotCalled(new TestError(ORIGIN_PRODUCER));
   }
 
   @Test
   public void test_consumerThrowsException_resourceClosed() throws Exception {
-    test_consumerThrows_resourceClosed(new TestException());
+    test_consumerThrows_resourceClosed(new TestException(ORIGIN_CONSUMER));
   }
 
   @Test
   public void test_consumerThrowsRuntimeException_resourceClosed() throws Exception {
-    test_consumerThrows_resourceClosed(new TestRuntimeException());
+    test_consumerThrows_resourceClosed(new TestRuntimeException(ORIGIN_CONSUMER));
   }
 
   @Test
   public void test_consumerThrowsError_resourceClosed() throws Exception {
-    test_consumerThrows_resourceClosed(new TestError());
+    test_consumerThrows_resourceClosed(new TestError(ORIGIN_CONSUMER));
   }
 
   @Test
   public void test_consumerThrowsException_and_resourceThrowsException_resourceExceptionIsSuppressed()
       throws Exception {
-    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestException(0),
-        new TestException(1));
+    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestException(ORIGIN_CONSUMER),
+        new TestException(ORIGIN_RESOURCE));
   }
 
   @Test
   public void test_consumerThrowsRuntimeException_and_resourceThrowsException_resourceExceptionIsSuppressed()
       throws Exception {
-    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestRuntimeException(0),
-        new TestException(1));
+    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(
+        new TestRuntimeException(ORIGIN_CONSUMER), new TestException(ORIGIN_RESOURCE));
   }
 
   @Test
   public void test_consumerThrowsError_and_resourceThrowsException_resourceExceptionIsSuppressed()
       throws Exception {
-    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestError(0),
-        new TestException(1));
+    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestError(ORIGIN_CONSUMER),
+        new TestException(ORIGIN_RESOURCE));
   }
 
   @Test
   public void test_consumerThrowsException_and_resourceThrowsRuntimeException_resourceRuntimeExceptionIsSuppressed()
       throws Exception {
-    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestException(0),
-        new TestRuntimeException(1));
+    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestException(ORIGIN_CONSUMER),
+        new TestRuntimeException(ORIGIN_RESOURCE));
   }
 
   @Test
   public void test_consumerThrowsRuntimeException_and_resourceThrowsRuntimeException_resourceRuntimeExceptionIsSuppressed()
       throws Exception {
-    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestRuntimeException(0),
-        new TestRuntimeException(1));
+    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(
+        new TestRuntimeException(ORIGIN_CONSUMER), new TestRuntimeException(ORIGIN_RESOURCE));
   }
 
   @Test
   public void test_consumerThrowsError_and_resourceThrowsRuntimeException_resourceRuntimeExceptionIsSuppressed()
       throws Exception {
-    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestError(0),
-        new TestRuntimeException(1));
+    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestError(ORIGIN_CONSUMER),
+        new TestRuntimeException(ORIGIN_RESOURCE));
   }
 
   @Test
   public void test_consumerThrowsException_and_resourceThrowsError_resourceErrorIsSuppressed()
       throws Exception {
-    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestException(0),
-        new TestError(1));
+    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestException(ORIGIN_CONSUMER),
+        new TestError(ORIGIN_RESOURCE));
   }
 
   @Test
   public void test_consumerThrowsRuntimeException_and_resourceThrowsError_resourceErrorIsSuppressed()
       throws Exception {
-    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestRuntimeException(0),
-        new TestError(1));
+    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(
+        new TestRuntimeException(ORIGIN_CONSUMER), new TestError(ORIGIN_RESOURCE));
   }
 
   @Test
   public void test_consumerThrowsError_and_resourceThrowsError_resourceErrorIsSuppressed()
       throws Exception {
-    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestError(0),
-        new TestError(1));
+    test_consumerThrows_and_resourceThrows_throwableIsSuppressed(new TestError(ORIGIN_CONSUMER),
+        new TestError(ORIGIN_RESOURCE));
   }
 
   @Test
   public void test_consumerThrowsException_and_resourceThrowsException_and_consumerExceptionThrowsRuntimeException_throwableRuntimeExceptionIsThrown()
       throws Exception {
     test_consumerThrows_and_resourceThrows_and_consumerThrowableThrows_throwableThrowableIsThrown(
-        new TestException(0), new TestException(1), new TestRuntimeException(2));
+        new TestException(ORIGIN_CONSUMER), new TestException(ORIGIN_RESOURCE),
+        new TestRuntimeException(ORIGIN_THROWABLE_ADD_SUPPRESSED));
   }
 
   @Test
   public void test_consumerThrowsException_and_resourceThrowsException_and_consumerExceptionThrowsError_throwableErrorIsThrown()
       throws Exception {
     test_consumerThrows_and_resourceThrows_and_consumerThrowableThrows_throwableThrowableIsThrown(
-        new TestException(0), new TestException(1), new TestError(2));
+        new TestException(ORIGIN_CONSUMER), new TestException(ORIGIN_RESOURCE),
+        new TestError(ORIGIN_THROWABLE_ADD_SUPPRESSED));
   }
 
   private void test_producerThrows_consumerNotCalled(final Throwable producerException)
@@ -240,10 +247,7 @@ public class TryWithResourceTemplateEmulatorTest {
     ResourceProducer<TestResource> producer = new ResourceProducer<TestResource>() {
       @Override
       public TestResource produce() throws Exception {
-        if (producerException instanceof Exception) {
-          throw (Exception) producerException;
-        }
-        throw (Error) producerException;
+        throw throwThrowable(producerException);
       }
     };
     ResourceConsumer<TestResource, TestConsumerResult> consumer = spy(
@@ -277,10 +281,7 @@ public class TryWithResourceTemplateEmulatorTest {
         new ResourceConsumer<TestResource, TestConsumerResult>() {
           @Override
           public TestConsumerResult consume(final TestResource resource) throws Exception {
-            if (consumerThrowable instanceof Exception) {
-              throw (Exception) consumerThrowable;
-            }
-            throw (Error) consumerThrowable;
+            throw throwThrowable(consumerThrowable);
           }
         });
 
@@ -311,10 +312,7 @@ public class TryWithResourceTemplateEmulatorTest {
         new ResourceConsumer<TestResource, TestConsumerResult>() {
           @Override
           public TestConsumerResult consume(final TestResource resource) throws Exception {
-            if (consumerThrowable instanceof Exception) {
-              throw (Exception) consumerThrowable;
-            }
-            throw (Error) consumerThrowable;
+            throw throwThrowable(consumerThrowable);
           }
         });
 
@@ -353,10 +351,7 @@ public class TryWithResourceTemplateEmulatorTest {
         new ResourceConsumer<TestResource, TestConsumerResult>() {
           @Override
           public TestConsumerResult consume(final TestResource resource) throws Exception {
-            if (consumerThrowableSpy instanceof Exception) {
-              throw (Exception) consumerThrowableSpy;
-            }
-            throw (Error) consumerThrowableSpy;
+            throw throwThrowable(consumerThrowableSpy);
           }
         });
 
@@ -373,6 +368,13 @@ public class TryWithResourceTemplateEmulatorTest {
     verify(consumer).consume(consumerArgCaptor.capture());
     assertThat(consumerArgCaptor.getValue(), is(sameInstance(resource)));
     verify(resource).close();
+  }
+
+  private static Exception throwThrowable(Throwable throwable) throws Exception {
+    if (throwable instanceof Exception) {
+      throw (Exception) throwable;
+    }
+    throw (Error) throwable;
   }
 
 }
