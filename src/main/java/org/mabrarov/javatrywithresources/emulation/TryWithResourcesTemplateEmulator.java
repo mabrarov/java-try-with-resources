@@ -15,7 +15,9 @@ public class TryWithResourcesTemplateEmulator<T extends AutoCloseable> implement
     try {
       return consumer.consume(resource);
     } finally {
-      resource.close();
+      if (resource != null) {
+        resource.close();
+      }
     }
   }
 
