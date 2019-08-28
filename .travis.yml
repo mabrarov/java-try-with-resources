@@ -2,12 +2,19 @@ language: java
 
 cache:
   directories:
-    - ${HOME}/.m2/repository/
+    - ${HOME}/.m2/repository
+    - ${HOME}/downloads
 
 env:
   global:
     - COVERAGE_BUILD: 0
     - CODECOV_VERSION: 2.0.15
+    - CURL_CONNECT_TIMEOUT: 300
+    - CURL_MAX_TIME: 1800
+    - CURL_RETRY: 10
+    - CURL_RETRY_DELAY: 10
+    - DEPENDENCIES_HOME: ${HOME}/dependencies
+    - DOWNLOADS_HOME: ${HOME}/downloads
 
 matrix:
   include:
@@ -31,22 +38,50 @@ matrix:
     # Oracle JDK 11
     - dist: trusty
       jdk: oraclejdk11
+    # Amazon Corretto 8
+    - dist: bionic
+      env: CUSTOM_JDK=amazon-corretto CUSTOM_JDK_VERSION=8.222.10.1
+    # Amazon Corretto 11
+    - dist: bionic
+      env: CUSTOM_JDK=amazon-corretto CUSTOM_JDK_VERSION=11.0.4.11.1
 
-install:
-  - if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
-      travis_retry pip3 install --user --upgrade pip &&
-      travis_retry pip3 install --user codecov=="${CODECOV_VERSION}";
-    fi
 
-script:
-  - if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
-      export MAVEN_PROFILES=" -P jacoco";
-    else
-      export MAVEN_PROFILES="";
-    fi
-  - mvn -f "${TRAVIS_BUILD_DIR}/pom.xml" --batch-mode clean package${MAVEN_PROFILES}
+install: |
+  if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
+    travis_retry pip3 install --user --upgrade pip &&
+    travis_retry pip3 install --user codecov=="${CODECOV_VERSION}";
+  fi &&
+  if [[ -n "${CUSTOM_JDK+x}" ]] && [[ -n "${CUSTOM_JDK_VERSION+x}" ]]; then
+    echo "Custom JDK requested: ${CUSTOM_JDK} ${CUSTOM_JDK_VERSION}" &&
+    case "${CUSTOM_JDK}" in
+      "amazon-corretto")
+        custom_jdk_dist_base_name="amazon-corretto-${CUSTOM_JDK_VERSION}-linux-x64" &&
+        custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
+        custom_jdk_url="https://d3pxv6yz143wms.cloudfront.net/${CUSTOM_JDK_VERSION}/${custom_jdk_dist_name}"
+        ;;
+      *)
+        echo "Unsupported cutom JDK: ${CUSTOM_JDK}" &&
+        exit 1
+        ;;
+    esac &&
+    mkdir -p "${DOWNLOADS_HOME}" &&
+    curl --connect-timeout "${CURL_CONNECT_TIMEOUT}" --max-time "${CURL_MAX_TIME}" --retry "${CURL_RETRY}" --retry-delay "${CURL_RETRY_DELAY}" -jksSL "${custom_jdk_url}" --output "${DOWNLOADS_HOME}/${custom_jdk_dist_name}" &&
+    mkdir -p "${DEPENDENCIES_HOME}" &&
+    tar -xzf "${DOWNLOADS_HOME}/${custom_jdk_dist_name}" -C "${DEPENDENCIES_HOME}" &&
+    export JAVA_HOME="${DEPENDENCIES_HOME}/${custom_jdk_dist_base_name}" &&
+    export PATH="${JAVA_HOME}/bin:${PATH}" &&
+    java -version;
+  fi
 
-after_success:
-  - if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
-      travis_retry codecov --required --token "${CODECOV_TOKEN}" --root "${TRAVIS_BUILD_DIR}" -X gcov;
-    fi
+script: |
+  if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
+    export MAVEN_PROFILES=" -P jacoco";
+  else
+    export MAVEN_PROFILES="";
+  fi &&
+  mvn -f "${TRAVIS_BUILD_DIR}/pom.xml" --batch-mode clean package${MAVEN_PROFILES}
+
+after_success: |
+  if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
+    travis_retry codecov --required --token "${CODECOV_TOKEN}" --root "${TRAVIS_BUILD_DIR}" -X gcov;
+  fi
