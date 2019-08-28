@@ -11,6 +11,3 @@
 *.iml
 *.iws
 *.ipr
-
-# Maven Wrapper
-.mvn/
