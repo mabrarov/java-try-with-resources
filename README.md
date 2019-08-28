@@ -8,7 +8,7 @@ Tests and examples with Java try-with-resources statement
 
 ## Building
 
-Prerequisites:
+Prerequisites
 
 * [JDK](https://openjdk.java.net/) 1.7+
 
@@ -28,13 +28,13 @@ Build steps
 
 ## Coverage report
 
-To build, run unit tests and generate JaCoCo report:
+To build, run unit tests and generate [JaCoCo](https://www.eclemma.org/jacoco/) report:
 
 ```bash
 ./mvnw clean install -P jacoco
 ```
 
-or on Windows
+or on Windows:
 
 ```cmd
 mvnw.cmd clean install -P jacoco
