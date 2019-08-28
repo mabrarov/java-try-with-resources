@@ -32,13 +32,13 @@ Build steps
 To build, run unit tests and generate [JaCoCo](https://www.eclemma.org/jacoco/) report:
 
 ```bash
-./mvnw clean install -P jacoco
+./mvnw clean package -P jacoco
 ```
 
 or on Windows:
 
 ```cmd
-mvnw.cmd clean install -P jacoco
+mvnw.cmd clean package -P jacoco
 ```
 
 JaCoCo HTML report is generated at `target/site/jacoco/index.html`
