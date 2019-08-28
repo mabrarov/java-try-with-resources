@@ -56,6 +56,8 @@ after_build:
         appveyor-retry codecov --required --token "${env:CODECOV_TOKEN}" --file "${codecov_coverage_file}" --root "${codecov_root_folder}" -X gcov;
       }
 
+test: false
+
 artifacts:
   - path: target\*.jar
     name: JAR
