@@ -50,6 +50,12 @@ matrix:
     # Azul Systems Zulu 11
     - dist: bionic
       env: CUSTOM_JDK=azul-zulu CUSTOM_JDK_VERSION=11.0.4
+    # AdoptOpenJDK 8
+    - dist: bionic
+      env: CUSTOM_JDK=AdoptOpenJDK CUSTOM_JDK_VERSION=8u222b10
+    # AdoptOpenJDK 11
+    - dist: bionic
+      env: CUSTOM_JDK=AdoptOpenJDK CUSTOM_JDK_VERSION=11.0.4_11
 
 install: |
   if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
@@ -76,6 +82,28 @@ install: |
             custom_jdk_dist_base_name="zulu11.33.15-ca-jdk${CUSTOM_JDK_VERSION}-linux_x64" &&
             custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
             custom_jdk_url="https://cdn.azul.com/zulu/bin/${custom_jdk_dist_name}"
+            ;;
+          *)
+            echo "Unsupported version of custom JDK: ${CUSTOM_JDK} ${CUSTOM_JDK_VERSION}" &&
+            exit 1
+        esac
+        ;;
+      "AdoptOpenJDK")
+        custom_jdk_version_major="$(echo "${CUSTOM_JDK_VERSION}" | sed -r 's/([0-9]+)[\.u].*/\1/;t;d')"
+        case "${custom_jdk_version_major}" in
+          "8")
+            custom_jdk_dist_base_name="OpenJDK8U-jdk_x64_linux_hotspot_${CUSTOM_JDK_VERSION}.tar.gz" &&
+            custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
+            custom_jdk_version_without_build="$(echo "${CUSTOM_JDK_VERSION}" | sed -r 's/([0-9]+u[0-9]+)b.*/\1/;t;d')" &&
+            custom_jdk_version_build="$(echo "${CUSTOM_JDK_VERSION}" | sed -r 's/([0-9]+u[0-9]+)b([0-9]+)/\2/;t;d')" &&
+            custom_jdk_url="https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk${custom_jdk_version_without_build}-b${custom_jdk_version_build}/${custom_jdk_dist_name}"
+            ;;
+          "11")
+            custom_jdk_dist_base_name="OpenJDK11U-jdk_x64_linux_hotspot_${CUSTOM_JDK_VERSION}.tar.gz" &&
+            custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
+            custom_jdk_version_without_build="$(echo "${CUSTOM_JDK_VERSION}" | sed -r 's/([0-9]+\.[0-9]+\.[0-9]+)_.*/\1/;t;d')" &&
+            custom_jdk_version_build="$(echo "${CUSTOM_JDK_VERSION}" | sed -r 's/([0-9]+\.[0-9]+\.[0-9]+)_([0-9])/\2/;t;d')" &&
+            custom_jdk_url="https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-${custom_jdk_version_without_build}%2B${custom_jdk_version_build}/${custom_jdk_dist_name}"
             ;;
           *)
             echo "Unsupported version of custom JDK: ${CUSTOM_JDK} ${CUSTOM_JDK_VERSION}" &&
