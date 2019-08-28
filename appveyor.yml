@@ -1,0 +1,63 @@
+image: Visual Studio 2017
+
+platform:
+  - x64
+
+environment:
+  COVERAGE_BUILD: 0
+  PIP_RETRY: 10
+  CODECOV_VERSION: 2.0.15
+
+  matrix:
+    - JDK_VERSION: 7
+      COVERAGE_BUILD: 1
+    - JDK_VERSION: 8
+    - JDK_VERSION: 10
+    - JDK_VERSION: 11
+
+cache:
+  - C:\Users\appveyor\.m2\repository -> .appveyor.yml
+
+install:
+  - ps: |
+      if (-not (Test-Path -Path env:CODECOV_TOKEN) -or (${env:CODECOV_TOKEN} -eq "")) {
+        Write-Warning "CODECOV_TOKEN is missing, skipping code coverage"
+        $env:COVERAGE_BUILD = 0
+      }
+      if (${env:COVERAGE_BUILD} -ne 0) {
+        pip install --disable-pip-version-check --retries "${env:PIP_RETRY}" codecov=="${env:CODECOV_VERSION}"
+      }
+      if ([int] ${env:JDK_VERSION} -le 8) {
+        $env:JAVA_HOME = "C:\Program Files\Java\jdk1.${env:JDK_VERSION}.0"
+      } else {
+        $env:JAVA_HOME = "C:\Program Files\Java\jdk${env:JDK_VERSION}"
+      }
+      Write-Host "JAVA_HOME: ${env:JAVA_HOME}"
+      $env:PATH = "${env:JAVA_HOME};${env:PATH}"
+      $env:MAVEN_OPTS = "-Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 ${env:MAVEN_OPTS}"
+
+build_script:
+  - ps: |
+      $build_cmd = "mvn -f ""${env:APPVEYOR_BUILD_FOLDER}\pom.xml"" --batch-mode clean package"
+      if (${env:COVERAGE_BUILD} -ne 0) {
+        $build_cmd = "${build_cmd} -P jacoco"
+      }
+      Write-Host "Building with: ${build_cmd}"
+      Invoke-Expression "${build_cmd}"
+      if (${LastExitCode} -ne 0) {
+        throw "Build failed with exit code ${LastExitCode}"
+      }
+
+after_build:
+  - ps: |
+      if (${env:COVERAGE_BUILD} -ne 0) {
+        $codecov_root_folder = ${env:APPVEYOR_BUILD_FOLDER} -replace "\\", "/"
+        $codecov_coverage_file = "$codecov_root_folder/target/site/jacoco/jacoco.xml"
+        appveyor-retry codecov --required --token "${env:CODECOV_TOKEN}" --file "${codecov_coverage_file}" --root "${codecov_root_folder}" -X gcov;
+      }
+
+artifacts:
+  - path: target\*.jar
+    name: JAR
+  - path: target\*.exec
+    name: JaCoCo stats
