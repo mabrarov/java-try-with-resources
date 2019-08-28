@@ -16,7 +16,7 @@ environment:
     - JDK_VERSION: 11
 
 cache:
-  - C:\Users\appveyor\.m2\repository -> .appveyor.yml
+  - C:\Users\appveyor\.m2\repository -> appveyor.yml
 
 install:
   - ps: |
@@ -55,6 +55,8 @@ after_build:
         $codecov_coverage_file = "$codecov_root_folder/target/site/jacoco/jacoco.xml"
         appveyor-retry codecov --required --token "${env:CODECOV_TOKEN}" --file "${codecov_coverage_file}" --root "${codecov_root_folder}" -X gcov;
       }
+
+test: false
 
 artifacts:
   - path: target\*.jar
