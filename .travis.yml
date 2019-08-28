@@ -44,7 +44,12 @@ matrix:
     # Amazon Corretto 11
     - dist: bionic
       env: CUSTOM_JDK=amazon-corretto CUSTOM_JDK_VERSION=11.0.4.11.1
-
+    # Azul Systems Zulu 8
+    - dist: bionic
+      env: CUSTOM_JDK=azul-zulu CUSTOM_JDK_VERSION=8.0.222
+    # Azul Systems Zulu 11
+    - dist: bionic
+      env: CUSTOM_JDK=azul-zulu CUSTOM_JDK_VERSION=11.0.4
 
 install: |
   if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
@@ -59,8 +64,26 @@ install: |
         custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
         custom_jdk_url="https://d3pxv6yz143wms.cloudfront.net/${CUSTOM_JDK_VERSION}/${custom_jdk_dist_name}"
         ;;
+      "azul-zulu")
+        custom_jdk_version_major="$(echo "${CUSTOM_JDK_VERSION}" | sed -r 's/([0-9]+)\..*/\1/;t;d')" &&
+        case "${custom_jdk_version_major}" in
+          "8")
+            custom_jdk_dist_base_name="zulu8.40.0.25-ca-jdk${CUSTOM_JDK_VERSION}-linux_x64" &&
+            custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
+            custom_jdk_url="https://cdn.azul.com/zulu/bin/${custom_jdk_dist_name}"
+            ;;
+          "11")
+            custom_jdk_dist_base_name="zulu11.33.15-ca-jdk${CUSTOM_JDK_VERSION}-linux_x64" &&
+            custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
+            custom_jdk_url="https://cdn.azul.com/zulu/bin/${custom_jdk_dist_name}"
+            ;;
+          *)
+            echo "Unsupported version of custom JDK: ${CUSTOM_JDK} ${CUSTOM_JDK_VERSION}" &&
+            exit 1
+        esac
+        ;;
       *)
-        echo "Unsupported cutom JDK: ${CUSTOM_JDK}" &&
+        echo "Unsupported custom JDK: ${CUSTOM_JDK}" &&
         exit 1
         ;;
     esac &&
@@ -70,7 +93,8 @@ install: |
     tar -xzf "${DOWNLOADS_HOME}/${custom_jdk_dist_name}" -C "${DEPENDENCIES_HOME}" &&
     export JAVA_HOME="${DEPENDENCIES_HOME}/${custom_jdk_dist_base_name}" &&
     export PATH="${JAVA_HOME}/bin:${PATH}" &&
-    java -version;
+    java -version &&
+    mvn -version;
   fi
 
 script: |
