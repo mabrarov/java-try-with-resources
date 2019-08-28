@@ -16,7 +16,7 @@ environment:
     - JDK_VERSION: 11
 
 cache:
-  - C:\Users\appveyor\.m2\repository -> .appveyor.yml
+  - C:\Users\appveyor\.m2\repository -> appveyor.yml
 
 install:
   - ps: |
