@@ -8,19 +8,27 @@ Tests and examples with Java try-with-resources statement
 
 ## Building
 
-[Maven Wrapper](https://github.com/takari/maven-wrapper) can be used for bulding:
+Prerequisites:
 
-```bash
-./mvnw clean install
-```
+* [JDK](https://openjdk.java.net/) 1.7+
 
-or on Windows
+Build steps
 
-```cmd
-mvnw.cmd clean install
-```
+* [Maven Wrapper](https://github.com/takari/maven-wrapper) can be used for building:
 
-## Building with JaCoCo code coverage report
+   ```bash
+   ./mvnw clean package
+   ```
+
+   or on Windows:
+
+   ```cmd
+   mvnw.cmd clean package
+   ```
+
+## Coverage report
+
+To build, run unit tests and generate JaCoCo report:
 
 ```bash
 ./mvnw clean install -P jacoco
