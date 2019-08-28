@@ -9,6 +9,7 @@ env:
   global:
     - COVERAGE_BUILD: 0
     - CODECOV_VERSION: 2.0.15
+    - PIP_RETRY: 10
     - CURL_CONNECT_TIMEOUT: 300
     - CURL_MAX_TIME: 1800
     - CURL_RETRY: 10
@@ -50,62 +51,15 @@ matrix:
     # Azul Systems Zulu 11
     - dist: bionic
       env: CUSTOM_JDK=azul-zulu CUSTOM_JDK_VERSION=11.0.4
+    # AdoptOpenJDK 8
+    - dist: bionic
+      env: CUSTOM_JDK=AdoptOpenJDK CUSTOM_JDK_VERSION=8u222b10
+    # AdoptOpenJDK 11
+    - dist: bionic
+      env: CUSTOM_JDK=AdoptOpenJDK CUSTOM_JDK_VERSION=11.0.4_11
 
-install: |
-  if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
-    travis_retry pip3 install --user --upgrade pip &&
-    travis_retry pip3 install --user codecov=="${CODECOV_VERSION}";
-  fi &&
-  if [[ -n "${CUSTOM_JDK+x}" ]] && [[ -n "${CUSTOM_JDK_VERSION+x}" ]]; then
-    echo "Custom JDK requested: ${CUSTOM_JDK} ${CUSTOM_JDK_VERSION}" &&
-    case "${CUSTOM_JDK}" in
-      "amazon-corretto")
-        custom_jdk_dist_base_name="amazon-corretto-${CUSTOM_JDK_VERSION}-linux-x64" &&
-        custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
-        custom_jdk_url="https://d3pxv6yz143wms.cloudfront.net/${CUSTOM_JDK_VERSION}/${custom_jdk_dist_name}"
-        ;;
-      "azul-zulu")
-        custom_jdk_version_major="$(echo "${CUSTOM_JDK_VERSION}" | sed -r 's/([0-9]+)\..*/\1/;t;d')" &&
-        case "${custom_jdk_version_major}" in
-          "8")
-            custom_jdk_dist_base_name="zulu8.40.0.25-ca-jdk${CUSTOM_JDK_VERSION}-linux_x64" &&
-            custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
-            custom_jdk_url="https://cdn.azul.com/zulu/bin/${custom_jdk_dist_name}"
-            ;;
-          "11")
-            custom_jdk_dist_base_name="zulu11.33.15-ca-jdk${CUSTOM_JDK_VERSION}-linux_x64" &&
-            custom_jdk_dist_name="${custom_jdk_dist_base_name}.tar.gz" &&
-            custom_jdk_url="https://cdn.azul.com/zulu/bin/${custom_jdk_dist_name}"
-            ;;
-          *)
-            echo "Unsupported version of custom JDK: ${CUSTOM_JDK} ${CUSTOM_JDK_VERSION}" &&
-            exit 1
-        esac
-        ;;
-      *)
-        echo "Unsupported custom JDK: ${CUSTOM_JDK}" &&
-        exit 1
-        ;;
-    esac &&
-    mkdir -p "${DOWNLOADS_HOME}" &&
-    curl --connect-timeout "${CURL_CONNECT_TIMEOUT}" --max-time "${CURL_MAX_TIME}" --retry "${CURL_RETRY}" --retry-delay "${CURL_RETRY_DELAY}" -jksSL "${custom_jdk_url}" --output "${DOWNLOADS_HOME}/${custom_jdk_dist_name}" &&
-    mkdir -p "${DEPENDENCIES_HOME}" &&
-    tar -xzf "${DOWNLOADS_HOME}/${custom_jdk_dist_name}" -C "${DEPENDENCIES_HOME}" &&
-    export JAVA_HOME="${DEPENDENCIES_HOME}/${custom_jdk_dist_base_name}" &&
-    export PATH="${JAVA_HOME}/bin:${PATH}" &&
-    java -version &&
-    mvn -version;
-  fi
+install: source ./scripts/travis/install.sh
 
-script: |
-  if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
-    export MAVEN_PROFILES=" -P jacoco";
-  else
-    export MAVEN_PROFILES="";
-  fi &&
-  mvn -f "${TRAVIS_BUILD_DIR}/pom.xml" --batch-mode clean package${MAVEN_PROFILES}
+script: source ./scripts/travis/build.sh
 
-after_success: |
-  if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
-    travis_retry codecov --required --token "${CODECOV_TOKEN}" --root "${TRAVIS_BUILD_DIR}" -X gcov;
-  fi
+after_success: source ./scripts/travis/codecov.sh
