@@ -19,10 +19,11 @@ $env:PATH = "${env:JAVA_HOME}\bin;${env:PATH}"
 $env:MAVEN_OPTS = "-Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 ${env:MAVEN_OPTS}"
 
 Write-Host "JAVA_HOME: ${env:JAVA_HOME}"
-java -version
+$java_version=(java -version 2>&1)
 if (${LastExitCode} -ne 0) {
   throw "Failed to run JVM"
 }
+Write-Host "${java_version}"
 mvn -version
 if (${LastExitCode} -ne 0) {
   throw "Failed to run Maven"
