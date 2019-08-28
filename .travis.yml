@@ -65,7 +65,7 @@ install: |
         custom_jdk_url="https://d3pxv6yz143wms.cloudfront.net/${CUSTOM_JDK_VERSION}/${custom_jdk_dist_name}"
         ;;
       "azul-zulu")
-        custom_jdk_version_major="$(echo "${CUSTOM_JDK_VERSION}" | sed -r 's/([0-9]+)\..*/\1/;t;d')"
+        custom_jdk_version_major="$(echo "${CUSTOM_JDK_VERSION}" | sed -r 's/([0-9]+)\..*/\1/;t;d')" &&
         case "${custom_jdk_version_major}" in
           "8")
             custom_jdk_dist_base_name="zulu8.40.0.25-ca-jdk${CUSTOM_JDK_VERSION}-linux_x64" &&
