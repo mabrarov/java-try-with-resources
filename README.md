@@ -6,3 +6,39 @@
 [![Code coverage status](https://codecov.io/gh/mabrarov/java-try-with-resources/branch/master/graph/badge.svg)](https://codecov.io/gh/mabrarov/java-try-with-resources/branch/master)
 
 Tests and examples with Java try-with-resources statement
+
+## Building
+
+Prerequisites
+
+* [JDK](https://openjdk.java.net/) 1.7+
+
+Build steps
+
+* [Maven Wrapper](https://github.com/takari/maven-wrapper) can be used for building:
+
+   ```bash
+   ./mvnw clean package
+   ```
+
+   or on Windows:
+
+   ```cmd
+   mvnw.cmd clean package
+   ```
+
+## Coverage report
+
+To build, run unit tests and generate [JaCoCo](https://www.eclemma.org/jacoco/) report:
+
+```bash
+./mvnw clean install -P jacoco
+```
+
+or on Windows:
+
+```cmd
+mvnw.cmd clean install -P jacoco
+```
+
+JaCoCo HTML report is generated at `target/site/jacoco/index.html`
