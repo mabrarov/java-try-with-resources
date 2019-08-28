@@ -14,7 +14,6 @@ environment:
     - JDK_VERSION: 8
     - JDK_VERSION: 10
     - JDK_VERSION: 11
-    - JDK_VERSION: 12
 
 cache:
   - C:\Users\appveyor\.m2\repository -> .appveyor.yml
