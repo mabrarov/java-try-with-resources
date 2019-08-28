@@ -115,11 +115,20 @@ install: |
         exit 1
         ;;
     esac &&
-    mkdir -p "${DOWNLOADS_HOME}" &&
-    curl --connect-timeout "${CURL_CONNECT_TIMEOUT}" --max-time "${CURL_MAX_TIME}" --retry "${CURL_RETRY}" --retry-delay "${CURL_RETRY_DELAY}" -jksSL "${custom_jdk_url}" --output "${DOWNLOADS_HOME}/${custom_jdk_dist_name}" &&
-    mkdir -p "${DEPENDENCIES_HOME}" &&
-    tar -xzf "${DOWNLOADS_HOME}/${custom_jdk_dist_name}" -C "${DEPENDENCIES_HOME}" &&
-    export JAVA_HOME="${DEPENDENCIES_HOME}/${custom_jdk_dist_base_name}" &&
+    custom_jdk_home="${DEPENDENCIES_HOME}/${custom_jdk_dist_base_name}" &&
+    if [[ ! -d "${custom_jdk_home}" ]]; then
+      custom_jdk_dist="${DOWNLOADS_HOME}/${custom_jdk_dist_name}" &&
+      if [[ ! -f "${custom_jdk_dist}" ]]; then
+        mkdir -p "${DOWNLOADS_HOME}" &&
+        echo "Downloading custom JDK from ${custom_jdk_url} to ${custom_jdk_dist}" &&
+        curl --connect-timeout "${CURL_CONNECT_TIMEOUT}" --max-time "${CURL_MAX_TIME}" --retry "${CURL_RETRY}" --retry-delay "${CURL_RETRY_DELAY}" -jksSL "${custom_jdk_url}" --output "${DOWNLOADS_HOME}/${custom_jdk_dist_name}";
+      fi &&
+      mkdir -p "${DEPENDENCIES_HOME}" &&
+      echo "Extracting custom JDK from ${custom_jdk_dist} into ${DEPENDENCIES_HOME}" &&
+      tar -xzf "${custom_jdk_dist}" -C "${DEPENDENCIES_HOME}";
+    fi &&
+    echo "${CUSTOM_JDK} ${CUSTOM_JDK_VERSION} is located at ${custom_jdk_home}" &&
+    export JAVA_HOME="${custom_jdk_home}" &&
     export PATH="${JAVA_HOME}/bin:${PATH}" &&
     java -version &&
     mvn -version;
