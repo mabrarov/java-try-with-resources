@@ -55,12 +55,11 @@ public class TryWithResourceTemplateTest {
         new TemplateNativeFactory<TestResource>(),
         TryWithResourceTemplateNative.class.getSimpleName()
       }
-      // TODO: Fix TryWithResourceTemplateEmulator to pass all tests
-      //,
-      //{
-      //  new TemplateEmulatorFactory<TestResource>(),
-      //  TryWithResourceTemplateEmulator.class.getSimpleName()
-      //}
+      ,
+      {
+        new TemplateEmulatorFactory<TestResource>(),
+        TryWithResourceTemplateEmulator.class.getSimpleName()
+      }
   };
   // @formatter:on
 
