@@ -10,7 +10,7 @@ public class TestRuntimeException extends RuntimeException {
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + " thrown by " + origin + '}';
+    return getClass().getSimpleName() + " thrown by " + origin;
   }
 
 }
