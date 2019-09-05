@@ -7,7 +7,7 @@ public class TryFinallyUseResourceAfterCloseTest {
 
   @Test(expected = IOException.class)
   public void test_readFromExistingFile_IOExceptionThrown() throws IOException {
-    new TryFinallyUseResourceAfterClose().readFirstLineFromFile(IntroductionTest.TEXT_FILE);
+    new TryFinallyUseResourceAfterClose().readFirstLineFromFile(IntroductionTest.FILE);
   }
 
 }

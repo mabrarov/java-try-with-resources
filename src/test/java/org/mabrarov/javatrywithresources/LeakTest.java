@@ -27,7 +27,7 @@ public class LeakTest {
   @Test
   public void test_wrongTryWithResources_bufferedReaderException_fileReaderIsNotClosed()
       throws IOException {
-    try (BufferedReader reader = new BufferedReader(new FileReader(IntroductionTest.TEXT_FILE), 0)) {
+    try (BufferedReader reader = new BufferedReader(new FileReader(IntroductionTest.FILE), 0)) {
       Assert.fail("Should throw IllegalArgumentException");
     } catch (IllegalArgumentException ignored) {
       // Expected
@@ -38,7 +38,7 @@ public class LeakTest {
   @Test
   public void test_chainedTryWithResources_bufferedReaderException_fileReaderIsClosed()
       throws IOException {
-    try (FileReader fileReader = new FileReader(IntroductionTest.TEXT_FILE);
+    try (FileReader fileReader = new FileReader(IntroductionTest.FILE);
          BufferedReader reader = new BufferedReader(fileReader, 0)) {
       Assert.fail("Should throw IllegalArgumentException");
     } catch (IllegalArgumentException ignored) {

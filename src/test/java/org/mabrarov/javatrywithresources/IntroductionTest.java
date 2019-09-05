@@ -14,7 +14,7 @@ import org.junit.Test;
 
 public class IntroductionTest {
 
-  static final String TEXT_FILE = "target/test-classes/test.txt";
+  static final String FILE = "target/test-classes/test.txt";
   private static final String FIRST_LINE_OF_TEXT_FILE = "This is 1st line of test.txt file";
 
   // @formatter:off
@@ -35,7 +35,7 @@ public class IntroductionTest {
 
   @Test
   public void test_readFromExistingFile_existingFile_firstLineIsRead() throws IOException {
-    String line = new Introduction().readFirstLineFromFile(TEXT_FILE);
+    String line = new Introduction().readFirstLineFromFile(FILE);
     Assert.assertEquals(FIRST_LINE_OF_TEXT_FILE, line);
   }
 
@@ -76,10 +76,8 @@ public class IntroductionTest {
   }
 
   private void initDatabase(DataSource dataSource) throws SQLException {
-    // @formatter:off
     try (Connection connection = dataSource.getConnection();
          Statement statement = connection.createStatement()) {
-    // @formatter:on
       statement.execute(DATABASE_STRUCTURE_SQL);
       connection.commit();
       for (String sql : DATABASE_FILL_SQL) {
