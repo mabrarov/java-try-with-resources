@@ -23,7 +23,7 @@ public class IntroductionTest {
   // @formatter:on
 
   // @formatter:off
-  private static final List<String> DATABASE_FILL_SQL = Arrays.asList(
+  private static final List<String> DATABASE_DATA_SQL = Arrays.asList(
       "INSERT INTO employee VALUES (1001, 'Pacman', 'pacman@example.com')",
       "INSERT INTO employee VALUES (1002, 'Batman', 'batman@example.com')",
       "INSERT INTO employee VALUES (1003, 'Superman', 'batman@example.com')");
@@ -79,11 +79,9 @@ public class IntroductionTest {
     try (Connection connection = dataSource.getConnection();
          Statement statement = connection.createStatement()) {
       statement.execute(DATABASE_STRUCTURE_SQL);
-      connection.commit();
-      for (String sql : DATABASE_FILL_SQL) {
+      for (String sql : DATABASE_DATA_SQL) {
         statement.executeUpdate(sql);
       }
-      connection.commit();
     }
   }
 
