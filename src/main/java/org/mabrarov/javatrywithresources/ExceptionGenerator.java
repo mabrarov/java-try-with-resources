@@ -1,6 +1,6 @@
 package org.mabrarov.javatrywithresources;
 
-public class StackTracePrinter {
+public class ExceptionGenerator {
 
   private static class ResourceConsumeException extends Exception {
 
@@ -25,30 +25,7 @@ public class StackTracePrinter {
 
   }
 
-  public static void main(String[] args) {
-    new StackTracePrinter().run();
-  }
-
-  private void run() {
-    try {
-      tryFinally();
-    } catch (Exception e) {
-      printStackTrace("\ntry-finally stacktrace:\n", e);
-    }
-
-    try {
-      tryWithResources();
-    } catch (Exception e) {
-      printStackTrace("\ntry-with-resources stacktrace:\n", e);
-    }
-  }
-
-  private void printStackTrace(String header, Throwable throwable) {
-    System.err.println(header);
-    throwable.printStackTrace();
-  }
-
-  private void tryFinally() throws Exception {
+  void tryFinally() throws Exception {
     Resource resource = new Resource();
     try {
       consumeResource(resource);
@@ -57,7 +34,7 @@ public class StackTracePrinter {
     }
   }
 
-  private void tryWithResources() throws Exception {
+  void tryWithResources() throws Exception {
     try (Resource resource = new Resource()) {
       consumeResource(resource);
     }
