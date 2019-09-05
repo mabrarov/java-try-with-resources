@@ -24,13 +24,13 @@ public class IntroductionTest {
 
   // @formatter:off
   private static final List<String> DATABASE_DATA_SQL = Arrays.asList(
-      "INSERT INTO employee VALUES (1001, 'Pacman', 'pacman@example.com')",
-      "INSERT INTO employee VALUES (1002, 'Batman', 'batman@example.com')",
-      "INSERT INTO employee VALUES (1003, 'Superman', 'batman@example.com')");
+      "INSERT INTO employee VALUES (1001, 'Pac-Man', 'pac-man@namco.com')",
+      "INSERT INTO employee VALUES (1002, 'Batman', 'bruce.wayne@gotham.com')",
+      "INSERT INTO employee VALUES (1003, 'Superman', 'clark.kent@metropolis.com')");
   // @formatter:on
 
   private static final String DATABASE_SELECT_SQL = "SELECT * FROM employee ORDER BY name";
-  private static final List<String> NAMES_SORTED = Arrays.asList("Batman", "Pacman", "Superman");
+  private static final List<String> NAMES_SORTED = Arrays.asList("Batman", "Pac-Man", "Superman");
   private static final String NAME_COLUMN = "name";
 
   @Test
