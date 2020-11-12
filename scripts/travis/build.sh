@@ -6,12 +6,12 @@ set -e
 source "${TRAVIS_BUILD_DIR}/scripts/travis/travis_retry.sh"
 
 if [[ "${MAVEN_WRAPPER}" -ne 0 ]]; then
-  build_cmd="\"${TRAVIS_BUILD_DIR}/mvnw\""
+  build_cmd="$(printf "%q" "${TRAVIS_BUILD_DIR}/mvnw")"
 else
   build_cmd="mvn"
 fi
 
-build_cmd="${build_cmd} -f "${TRAVIS_BUILD_DIR}/pom.xml" --batch-mode clean package"
+build_cmd="${build_cmd} -f $(printf "%q" "${TRAVIS_BUILD_DIR}/pom.xml") --batch-mode clean package"
 
 if [[ "${COVERAGE_BUILD}" -ne 0 ]]; then
   build_cmd="${build_cmd} -P jacoco"
