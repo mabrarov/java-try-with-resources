@@ -34,9 +34,9 @@ matrix:
       env:
         - MAVEN_WRAPPER: '1'
       jdk: 'openjdk11'
-    # OpenJDK 12
+    # OpenJDK 14
     - dist: 'bionic'
-      jdk: 'openjdk12'
+      jdk: 'openjdk14'
     # OpenJDK 8
     - dist: 'trusty'
       jdk: 'openjdk8'
