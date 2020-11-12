@@ -32,6 +32,8 @@ matrix:
     # OpenJDK 7
     - dist: 'trusty'
       jdk: 'openjdk7'
+      env:
+        - MOCKITO_VERSION: '2.28.2'
     # OpenJDK 8
     - dist: 'trusty'
       jdk: 'openjdk8'

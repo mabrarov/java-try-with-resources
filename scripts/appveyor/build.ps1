@@ -6,6 +6,10 @@ if (${env:MAVEN_WRAPPER} -ne 0) {
 
 $build_cmd = "${build_cmd} -f ""${env:APPVEYOR_BUILD_FOLDER}\pom.xml"" --batch-mode clean package"
 
+if (Test-Path env:MOCKITO_VERSION) {
+  $build_cmd = "${build_cmd} -D mockito.version=""${env:MOCKITO_VERSION}"""
+}
+
 if (${env:COVERAGE_BUILD} -ne 0) {
   $build_cmd = "${build_cmd} -P jacoco"
 }

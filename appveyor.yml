@@ -13,6 +13,7 @@ environment:
     - JDK_VERSION: '11'
       COVERAGE_BUILD: '1'
     - JDK_VERSION: '7'
+      MOCKITO_VERSION: '2.28.2'
     - JDK_VERSION: '8'
     - JDK_VERSION: '14'
     - JDK_VERSION: '11'
