@@ -20,32 +20,32 @@ env:
 
 matrix:
   include:
-    # OpenJDK 7
-    - dist: 'trusty'
+    # OpenJDK 11
+    - dist: 'bionic'
+      jdk: 'openjdk11'
       env:
         - COVERAGE_BUILD: '1'
-      jdk: 'openjdk7'
       addons:
         apt:
           packages:
             - "python3-pip"
-    # OpenJDK 11 with Maven Wrapper
-    - dist: 'bionic'
-      env:
-        - MAVEN_WRAPPER: '1'
-      jdk: 'openjdk11'
-    # OpenJDK 14
-    - dist: 'bionic'
-      jdk: 'openjdk14'
+    # OpenJDK 7
+    - dist: 'trusty'
+      jdk: 'openjdk7'
     # OpenJDK 8
     - dist: 'trusty'
       jdk: 'openjdk8'
+    # OpenJDK 14
+    - dist: 'bionic'
+      jdk: 'openjdk14'
+    # OpenJDK 11 with Maven Wrapper
+    - dist: 'bionic'
+      jdk: 'openjdk11'
+      env:
+        - MAVEN_WRAPPER: '1'
     # Oracle JDK 8
     - dist: 'trusty'
       jdk: 'oraclejdk8'
-    # OpenJDK 11
-    - dist: 'bionic'
-      jdk: 'openjdk11'
     # Oracle JDK 11
     - dist: 'trusty'
       jdk: 'oraclejdk11'

@@ -10,13 +10,13 @@ environment:
   CODECOV_VERSION: '2.1.7'
 
   matrix:
-    - JDK_VERSION: '7'
+    - JDK_VERSION: '11'
       COVERAGE_BUILD: '1'
+    - JDK_VERSION: '7'
+    - JDK_VERSION: '8'
+    - JDK_VERSION: '14'
     - JDK_VERSION: '11'
       MAVEN_WRAPPER: '1'
-    - JDK_VERSION: '14'
-    - JDK_VERSION: '8'
-    - JDK_VERSION: '11'
 
 cache:
   - 'C:\Users\appveyor\.m2\repository -> appveyor.yml'
