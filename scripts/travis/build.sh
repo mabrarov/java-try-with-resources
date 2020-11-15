@@ -13,7 +13,7 @@ fi
 
 build_cmd="${build_cmd} -f $(printf "%q" "${TRAVIS_BUILD_DIR}/pom.xml") --batch-mode clean package"
 
-if [[ "${MOCKITO_VERSION}" != "" ]]; then
+if [[ -n "${MOCKITO_VERSION}" ]]; then
   build_cmd="${build_cmd} -D mockito.version=$(printf "%q" "${MOCKITO_VERSION}")"
 fi
 
